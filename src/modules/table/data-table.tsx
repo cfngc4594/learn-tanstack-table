@@ -20,11 +20,19 @@ export const DataTable = ({ table }: DataTableProps) => {
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id}>
             {headerGroup.headers.map((header) => (
-              <TableHead key={header.id}>
+              <TableHead
+                key={header.id}
+                onClick={header.column.getToggleSortingHandler()}
+              >
                 {flexRender(
                   header.column.columnDef.header,
                   header.getContext()
                 )}
+                {header.column.getIsSorted() === "asc"
+                  ? " ↑"
+                  : header.column.getIsSorted() === "desc"
+                  ? " ↓"
+                  : ""}
               </TableHead>
             ))}
           </TableRow>
