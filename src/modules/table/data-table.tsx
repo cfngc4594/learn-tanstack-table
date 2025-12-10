@@ -18,17 +18,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { DataTablePagination } from "./data-table-pagination";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -65,18 +58,12 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        <Input
-          placeholder="全局搜索..."
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-sm"
-        />
-        <div className="text-muted-foreground text-sm">
-          已选择 {table.getFilteredSelectedRowModel().rows.length} 条，共{" "}
-          {table.getFilteredRowModel().rows.length} 条数据
-        </div>
-      </div>
+      <Input
+        placeholder="全局搜索..."
+        value={globalFilter}
+        onChange={(e) => setGlobalFilter(e.target.value)}
+        className="max-w-sm"
+      />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -141,57 +128,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">每页显示</p>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => {
-              table.setPageSize(Number(value));
-            }}
-          >
-            <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder={table.getState().pagination.pageSize} />
-            </SelectTrigger>
-            <SelectContent side="top">
-              {[5, 10, 20, 30, 50].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
-                  {pageSize}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="text-sm text-muted-foreground">
-            共 {table.getFilteredRowModel().rows.length} 条数据
-          </p>
-        </div>
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2 text-sm font-medium">
-            <p>
-              第 {table.getState().pagination.pageIndex + 1} 页，共{" "}
-              {table.getPageCount()} 页
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.previousPage()}
-              disabled={!table.getCanPreviousPage()}
-            >
-              上一页
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => table.nextPage()}
-              disabled={!table.getCanNextPage()}
-            >
-              下一页
-            </Button>
-          </div>
-        </div>
-      </div>
+      <DataTablePagination table={table} />
     </div>
   );
 }
