@@ -7,6 +7,7 @@ import {
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  RowSelectionState,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -39,6 +40,7 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -49,6 +51,7 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onGlobalFilterChange: setGlobalFilter,
+    onRowSelectionChange: setRowSelection,
     initialState: {
       pagination: {
         pageSize: 5,
@@ -56,17 +59,24 @@ export function DataTable<TData, TValue>({
     },
     state: {
       globalFilter,
+      rowSelection,
     },
   });
 
   return (
     <div className="flex flex-col gap-4">
-      <Input
-        placeholder="全局搜索..."
-        value={globalFilter}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        className="max-w-sm"
-      />
+      <div className="flex items-center justify-between">
+        <Input
+          placeholder="全局搜索..."
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="max-w-sm"
+        />
+        <div className="text-muted-foreground text-sm">
+          已选择 {table.getFilteredSelectedRowModel().rows.length} 条，共{" "}
+          {table.getFilteredRowModel().rows.length} 条数据
+        </div>
+      </div>
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
