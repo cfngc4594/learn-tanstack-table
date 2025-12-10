@@ -1,42 +1,87 @@
-"use client";
-
-import { TABLE_COLUMNS } from "@/modules/table/constants";
 import { DataTable } from "@/modules/table/data-table";
-import { MOCK_DATA } from "@/modules/table/mocks";
-import {
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { columns, Person } from "@/modules/table/columns";
 
-const Page = () => {
-  const [globalFilter, setGlobalFilter] = useState("");
-
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
-    data: MOCK_DATA,
-    columns: TABLE_COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    state: {
-      globalFilter,
+async function getData(): Promise<Person[]> {
+  return [
+    {
+      id: "1",
+      name: "张三",
+      age: 25,
+      role: "前端工程师",
+      city: "北京",
     },
-  });
+    {
+      id: "2",
+      name: "李四",
+      age: 30,
+      role: "后端工程师",
+      city: "上海",
+    },
+    {
+      id: "3",
+      name: "王五",
+      age: 35,
+      role: "全栈工程师",
+      city: "广州",
+    },
+    {
+      id: "4",
+      name: "赵六",
+      age: 40,
+      role: "UI设计师",
+      city: "深圳",
+    },
+    {
+      id: "5",
+      name: "孙七",
+      age: 45,
+      role: "产品经理",
+      city: "成都",
+    },
+    {
+      id: "6",
+      name: "周八",
+      age: 28,
+      role: "前端工程师",
+      city: "杭州",
+    },
+    {
+      id: "7",
+      name: "吴九",
+      age: 32,
+      role: "后端工程师",
+      city: "北京",
+    },
+    {
+      id: "8",
+      name: "郑十",
+      age: 27,
+      role: "前端工程师",
+      city: "上海",
+    },
+    {
+      id: "9",
+      name: "钱十一",
+      age: 33,
+      role: "UI设计师",
+      city: "广州",
+    },
+    {
+      id: "10",
+      name: "陈十二",
+      age: 38,
+      role: "产品经理",
+      city: "深圳",
+    },
+  ];
+}
+
+const Page = async () => {
+  const data = await getData();
 
   return (
-    <div className="h-screen max-w-7xl mx-auto p-6 space-y-4">
-      <Input
-        placeholder="全局搜索..."
-        value={globalFilter ?? ""}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        className="max-w-sm"
-      />
-      <DataTable table={table} />
+    <div className="container mx-auto py-10">
+      <DataTable columns={columns} data={data} />
     </div>
   );
 };

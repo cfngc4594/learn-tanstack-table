@@ -1,7 +1,14 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { Person } from "./types";
 
-export const TABLE_COLUMNS: ColumnDef<Person>[] = [
+export type Person = {
+  id: string;
+  name: string;
+  age: number;
+  role: string;
+  city: string;
+};
+
+export const columns: ColumnDef<Person>[] = [
   {
     accessorKey: "name",
     header: "姓名",
