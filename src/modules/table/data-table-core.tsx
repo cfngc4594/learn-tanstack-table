@@ -6,7 +6,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+// import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { ColumnDef, flexRender } from "@tanstack/react-table";
 import { Table as TanStackTable } from "@tanstack/react-table";
 
@@ -28,7 +28,7 @@ export function DataTableCore<TData, TValue>({
               {headerGroup.headers.map((header) => (
                 <TableHead
                   key={header.id}
-                  onClick={header.column.getToggleSortingHandler()}
+                  // onClick={header.column.getToggleSortingHandler()}
                 >
                   <div className="inline-flex items-center justify-between w-full">
                     {header.isPlaceholder
@@ -37,7 +37,7 @@ export function DataTableCore<TData, TValue>({
                           header.column.columnDef.header,
                           header.getContext()
                         )}
-                    {header.column.getCanSort() &&
+                    {/* {header.column.getCanSort() &&
                       (() => {
                         const sorted = header.column.getIsSorted();
                         if (sorted === false) {
@@ -47,7 +47,7 @@ export function DataTableCore<TData, TValue>({
                           asc: <ArrowUp className="size-4" />,
                           desc: <ArrowDown className="size-4" />,
                         }[sorted];
-                      })()}
+                      })()} */}
                   </div>
                 </TableHead>
               ))}
