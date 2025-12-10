@@ -4,6 +4,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
@@ -25,6 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -35,6 +38,8 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [globalFilter, setGlobalFilter] = useState<string>("");
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
@@ -42,15 +47,26 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onGlobalFilterChange: setGlobalFilter,
     initialState: {
       pagination: {
         pageSize: 5,
       },
     },
+    state: {
+      globalFilter,
+    },
   });
 
   return (
-    <div>
+    <div className="flex flex-col gap-4">
+      <Input
+        placeholder="全局搜索..."
+        value={globalFilter}
+        onChange={(e) => setGlobalFilter(e.target.value)}
+        className="max-w-sm"
+      />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
@@ -68,16 +84,17 @@ export function DataTable<TData, TValue>({
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                      {header.column.getCanSort() && (() => {
-                        const sorted = header.column.getIsSorted();
-                        if (sorted === false) {
-                          return <ArrowUpDown className="size-4" />;
-                        }
-                        return {
-                          asc: <ArrowUp className="size-4" />,
-                          desc: <ArrowDown className="size-4" />,
-                        }[sorted];
-                      })()}
+                      {header.column.getCanSort() &&
+                        (() => {
+                          const sorted = header.column.getIsSorted();
+                          if (sorted === false) {
+                            return <ArrowUpDown className="size-4" />;
+                          }
+                          return {
+                            asc: <ArrowUp className="size-4" />,
+                            desc: <ArrowDown className="size-4" />,
+                          }[sorted];
+                        })()}
                     </div>
                   </TableHead>
                 ))}
@@ -114,7 +131,7 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between py-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">每页显示</p>
           <Select
