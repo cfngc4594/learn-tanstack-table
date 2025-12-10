@@ -1,54 +1,44 @@
-import { flexRender, Table as TanStackTable } from "@tanstack/react-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { Person } from "./types";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { SimpleTable } from "./components/simple-table";
+import { GroupTable } from "./components/group-table";
 
-type DataTableProps = {
-  table: TanStackTable<Person>;
+type GroupedDataTableProps = {
+  groupedData: Record<string, Person[]>;
+  columns: ColumnDef<Person>[];
+  groupBy: string;
 };
 
-export const DataTable = ({ table }: DataTableProps) => {
+/**
+ * 分组数据表格主组件
+ * 根据 groupBy 参数决定是否分组显示
+ */
+export const GroupedDataTable = ({
+  groupedData,
+  columns,
+  groupBy,
+}: GroupedDataTableProps) => {
+  // 如果不分组，直接渲染单个表格
+  if (groupBy === "none") {
+    const allData = Object.values(groupedData)[0] || [];
+    return (
+      <div className="rounded-md border">
+        <SimpleTable data={allData} columns={columns} />
+      </div>
+    );
+  }
+
+  // 分组渲染
   return (
-    <Table>
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id}>
-            {headerGroup.headers.map((header) => (
-              <TableHead
-                key={header.id}
-                onClick={header.column.getToggleSortingHandler()}
-              >
-                {flexRender(
-                  header.column.columnDef.header,
-                  header.getContext()
-                )}
-                {header.column.getIsSorted() === "asc"
-                  ? " ↑"
-                  : header.column.getIsSorted() === "desc"
-                  ? " ↓"
-                  : ""}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows.map((row) => (
-          <TableRow key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <TableCell key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+    <div className="space-y-4">
+      {Object.entries(groupedData).map(([groupName, data]) => (
+        <GroupTable
+          key={groupName}
+          groupName={groupName}
+          data={data}
+          columns={columns}
+        />
+      ))}
+    </div>
   );
 };

@@ -1,42 +1,39 @@
 "use client";
 
 import { TABLE_COLUMNS } from "@/modules/table/constants";
-import { DataTable } from "@/modules/table/data-table";
+import { GroupedDataTable } from "@/modules/table/data-table";
 import { MOCK_DATA } from "@/modules/table/mocks";
-import {
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { GroupBySelector, GroupByKey } from "@/modules/table/group-by-selector";
+import { useTableData } from "@/modules/table/use-table-data";
 
 const Page = () => {
   const [globalFilter, setGlobalFilter] = useState("");
+  const [groupBy, setGroupBy] = useState<GroupByKey>("role");
 
-  // eslint-disable-next-line react-hooks/incompatible-library
-  const table = useReactTable({
+  const { groupedData } = useTableData({
     data: MOCK_DATA,
-    columns: TABLE_COLUMNS,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    state: {
-      globalFilter,
-    },
+    globalFilter,
+    groupBy,
   });
 
   return (
     <div className="h-screen max-w-7xl mx-auto p-6 space-y-4">
-      <Input
-        placeholder="全局搜索..."
-        value={globalFilter ?? ""}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        className="max-w-sm"
+      <div className="flex items-center gap-2">
+        <Input
+          placeholder="全局搜索..."
+          value={globalFilter ?? ""}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          className="max-w-sm"
+        />
+        <GroupBySelector value={groupBy} onValueChange={setGroupBy} />
+      </div>
+      <GroupedDataTable
+        groupedData={groupedData}
+        columns={TABLE_COLUMNS}
+        groupBy={groupBy}
       />
-      <DataTable table={table} />
     </div>
   );
 };
