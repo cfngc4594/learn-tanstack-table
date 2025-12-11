@@ -182,13 +182,17 @@ export function DataTable<TData, TValue>({
                 <TabsList className="p-0 h-7 bg-transparent">
                   <TabsTrigger
                     value="all"
-                    className="px-3 data-[state=active]:bg-muted"
+                    className="px-3 data-[state=active]:bg-muted cursor-pointer"
                   >
                     全部
                   </TabsTrigger>
                 </TabsList>
               </Tabs>
-              <Button size="icon" variant="ghost" className="size-7">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="size-7 cursor-pointer"
+              >
                 <PlusIcon />
               </Button>
             </div>
@@ -196,7 +200,7 @@ export function DataTable<TData, TValue>({
               <Button
                 size="icon"
                 variant="outline"
-                className="h-7 w-12 gap-0"
+                className="h-7 w-12 gap-0 cursor-pointer"
                 onClick={() => setShowSearchAndFilter(true)}
               >
                 <SearchIcon className="m-0.5" />
@@ -205,7 +209,7 @@ export function DataTable<TData, TValue>({
               <Button
                 size="icon"
                 variant="outline"
-                className="size-7"
+                className="size-7 cursor-pointer"
                 onClick={enterColumnEditMode}
               >
                 <Columns3Icon />
@@ -241,14 +245,14 @@ export function DataTable<TData, TValue>({
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
-                className="h-6 px-2 py-1"
+                className="h-6 px-2 py-1 cursor-pointer"
                 onClick={cancelColumnEditing}
               >
                 <span>取消</span>
               </Button>
               <Button
                 variant="secondary"
-                className="h-6 px-2 py-1"
+                className="h-6 px-2 py-1 cursor-pointer"
                 onClick={saveColumnChanges}
               >
                 保存
@@ -269,7 +273,7 @@ export function DataTable<TData, TValue>({
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  className="h-6 px-2 py-1"
+                  className="h-6 px-2 py-1 cursor-pointer"
                   onClick={() => {
                     setGlobalFilter("");
                     setShowSearchAndFilter(false);
@@ -277,7 +281,10 @@ export function DataTable<TData, TValue>({
                 >
                   <span>取消</span>
                 </Button>
-                <Button variant="secondary" className="h-6 px-2 py-1">
+                <Button
+                  variant="secondary"
+                  className="h-6 px-2 py-1 cursor-pointer"
+                >
                   另存为
                 </Button>
                 <SortDropdownMenu table={table} />
@@ -286,7 +293,7 @@ export function DataTable<TData, TValue>({
             <div className="h-9 flex items-center px-2 py-1.5 border-b gap-1">
               <Button
                 variant="outline"
-                className="h-6 has-[>svg]:pl-2 has-[>svg]:pr-1.5 py-0 border-dashed gap-0 text-muted-foreground"
+                className="h-6 has-[>svg]:pl-2 has-[>svg]:pr-1.5 py-0 border-dashed gap-0 text-muted-foreground cursor-pointer"
               >
                 <span className="text-xs font-normal">添加筛选条件</span>
                 <PlusIcon />

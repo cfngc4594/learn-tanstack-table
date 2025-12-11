@@ -93,7 +93,7 @@ export function SortDropdownMenu<TData extends RowData>({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" variant="outline" className="size-7">
+        <Button size="icon" variant="outline" className="size-7 cursor-pointer">
           <ArrowUpDownIcon />
         </Button>
       </DropdownMenuTrigger>
@@ -122,7 +122,11 @@ export function SortDropdownMenu<TData extends RowData>({
                       key={column.id}
                       className="flex items-center space-x-2"
                     >
-                      <RadioGroupItem value={column.id} id={column.id} />
+                      <RadioGroupItem
+                        value={column.id}
+                        id={column.id}
+                        className="cursor-pointer"
+                      />
                       <Label
                         htmlFor={column.id}
                         className="text-sm font-normal cursor-pointer"
@@ -140,7 +144,10 @@ export function SortDropdownMenu<TData extends RowData>({
             <DropdownMenuItem
               onClick={() => handleSort("asc")}
               onSelect={(e) => e.preventDefault()}
-              className={cn(sortDirection === "asc" && "bg-accent")}
+              className={cn(
+                sortDirection === "asc" && "bg-accent",
+                "cursor-pointer"
+              )}
             >
               <ArrowUpIcon className="mr-2 size-4" />
               {currentLabels.asc}
@@ -148,7 +155,10 @@ export function SortDropdownMenu<TData extends RowData>({
             <DropdownMenuItem
               onClick={() => handleSort("desc")}
               onSelect={(e) => e.preventDefault()}
-              className={cn(sortDirection === "desc" && "bg-accent", "mt-1")}
+              className={cn(
+                sortDirection === "desc" && "bg-accent",
+                "cursor-pointer mt-1"
+              )}
             >
               <ArrowDownIcon className="mr-2 size-4" />
               {currentLabels.desc}

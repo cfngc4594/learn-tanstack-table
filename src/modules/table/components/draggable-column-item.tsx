@@ -35,7 +35,7 @@ export function DraggableColumnItem({
       </motion.div>
       <button
         onClick={() => onToggleVisibility(columnId)}
-        className="flex items-center justify-between gap-2 flex-1 hover:opacity-80 transition-opacity"
+        className="flex items-center justify-between gap-2 flex-1 hover:opacity-80 transition-opacity cursor-pointer"
       >
         <span className="text-sm font-medium whitespace-nowrap">
           {columnHeader}
