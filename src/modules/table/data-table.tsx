@@ -10,6 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
+import { Reorder } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableCore } from "./data-table-core";
@@ -22,6 +23,9 @@ import {
   PlusIcon,
   SearchIcon,
 } from "lucide-react";
+import { useColumnVisibility } from "./hooks/use-column-visibility";
+import { useColumnOrder } from "./hooks/use-column-order";
+import { DraggableColumnItem } from "./components/draggable-column-item";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -40,7 +44,29 @@ export function DataTable<TData, TValue>({
   const [searchValue, setSearchValue] = useState<string>("");
   const [showSearchAndFilter, setShowSearchAndFilter] =
     useState<boolean>(false);
+  const [isColumnEditMode, setIsColumnEditMode] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+  // 使用自定义 hook 管理列可见性
+  const {
+    columnVisibility,
+    pendingColumnVisibility,
+    setColumnVisibility,
+    initPendingVisibility,
+    applyPendingVisibility,
+    resetPendingVisibility,
+    togglePendingVisibility,
+  } = useColumnVisibility();
+
+  // 使用自定义 hook 管理列顺序
+  const {
+    columnOrder,
+    pendingColumnOrder,
+    setColumnOrder,
+    setPendingColumnOrder,
+    initPendingOrder,
+    resetPendingOrder,
+  } = useColumnOrder();
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
@@ -52,6 +78,8 @@ export function DataTable<TData, TValue>({
     // getFilteredRowModel: getFilteredRowModel(),
     // onGlobalFilterChange: setGlobalFilter,
     onRowSelectionChange: setRowSelection,
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnOrderChange: setColumnOrder,
     initialState: {
       pagination: {
         pageSize,
@@ -60,8 +88,66 @@ export function DataTable<TData, TValue>({
     state: {
       // globalFilter,
       rowSelection,
+      columnVisibility,
+      columnOrder,
     },
   });
+
+  // 辅助函数：获取可编辑的列（可隐藏的列）
+  const getEditableColumnIds = () => {
+    const currentOrder = table.getState().columnOrder;
+    return currentOrder.length > 0
+      ? currentOrder.filter((id) => {
+          const column = table.getColumn(id);
+          return column?.getCanHide();
+        })
+      : table
+          .getAllColumns()
+          .filter((column) => column.getCanHide())
+          .map((column) => column.id);
+  };
+
+  // 辅助函数：获取固定列（不可隐藏的列）
+  const getFixedColumnIds = () => {
+    const currentOrder = table.getState().columnOrder;
+    const allColumns = table.getAllColumns();
+
+    return currentOrder.length > 0
+      ? currentOrder.filter((id) => {
+          const column = table.getColumn(id);
+          return column && !column.getCanHide();
+        })
+      : allColumns
+          .filter((column) => !column.getCanHide())
+          .map((column) => column.id);
+  };
+
+  // 进入列编辑模式
+  const enterColumnEditMode = () => {
+    initPendingVisibility(table.getState().columnVisibility);
+    initPendingOrder(getEditableColumnIds());
+    setIsColumnEditMode(true);
+  };
+
+  // 保存列配置
+  const saveColumnChanges = () => {
+    applyPendingVisibility();
+
+    // 合并固定列和可编辑列的顺序
+    const fixedColumns = getFixedColumnIds();
+    const mergedColumnOrder = [...fixedColumns, ...pendingColumnOrder];
+
+    // 设置完整的列顺序
+    setColumnOrder(mergedColumnOrder);
+    setIsColumnEditMode(false);
+  };
+
+  // 取消列编辑
+  const cancelColumnEditing = () => {
+    resetPendingVisibility();
+    resetPendingOrder();
+    setIsColumnEditMode(false);
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -72,7 +158,7 @@ export function DataTable<TData, TValue>({
         className="max-w-sm"
       /> */}
       <div className="flex flex-col border rounded-2xl overflow-hidden">
-        {!showSearchAndFilter && (
+        {!showSearchAndFilter && !isColumnEditMode && (
           <div className="h-11 flex items-center justify-between p-2 border-b">
             <div className="flex items-center gap-2">
               <Tabs defaultValue="all">
@@ -99,11 +185,58 @@ export function DataTable<TData, TValue>({
                 <SearchIcon className="m-0.5" />
                 <ListFilterIcon className="m-0.5" />
               </Button>
-              <Button size="icon" variant="outline" className="size-7">
+              <Button
+                size="icon"
+                variant="outline"
+                className="size-7"
+                onClick={enterColumnEditMode}
+              >
                 <Columns3Icon />
               </Button>
               <Button size="icon" variant="outline" className="size-7">
                 <ArrowUpDownIcon />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {isColumnEditMode && (
+          <div className="h-11 flex items-center justify-between p-2 border-b">
+            <div className="flex items-center gap-2">
+              <Tabs defaultValue="all">
+                <TabsList className="p-0 h-7 bg-transparent">
+                  <TabsTrigger
+                    value="all"
+                    className="px-3 data-[state=active]:bg-muted"
+                    disabled={true}
+                  >
+                    全部
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="size-7"
+                disabled={true}
+              >
+                <PlusIcon />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                className="h-6 px-2 py-1"
+                onClick={cancelColumnEditing}
+              >
+                <span>取消</span>
+              </Button>
+              <Button
+                variant="secondary"
+                className="h-6 px-2 py-1"
+                onClick={saveColumnChanges}
+              >
+                保存
               </Button>
             </div>
           </div>
@@ -146,7 +279,37 @@ export function DataTable<TData, TValue>({
           </>
         )}
 
-        <DataTableCore table={table} columns={columns} />
+        {isColumnEditMode && pendingColumnOrder.length > 0 && (
+          <Reorder.Group
+            axis="x"
+            values={pendingColumnOrder}
+            onReorder={setPendingColumnOrder}
+            className="flex items-center p-2 gap-2 overflow-x-auto"
+          >
+            {pendingColumnOrder.map((columnId) => {
+              const column = table.getColumn(columnId);
+              if (!column) return null;
+
+              const isVisible = pendingColumnVisibility[columnId] !== false;
+              const columnHeader =
+                typeof column.columnDef.header === "string"
+                  ? column.columnDef.header
+                  : columnId;
+
+              return (
+                <DraggableColumnItem
+                  key={columnId}
+                  columnId={columnId}
+                  columnHeader={columnHeader}
+                  isVisible={isVisible}
+                  onToggleVisibility={togglePendingVisibility}
+                />
+              );
+            })}
+          </Reorder.Group>
+        )}
+
+        {!isColumnEditMode && <DataTableCore table={table} columns={columns} />}
       </div>
       <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
     </div>
