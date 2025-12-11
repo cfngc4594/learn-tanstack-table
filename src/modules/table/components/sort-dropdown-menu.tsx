@@ -139,6 +139,7 @@ export function SortDropdownMenu<TData extends RowData>({
 
             <DropdownMenuItem
               onClick={() => handleSort("asc")}
+              onSelect={(e) => e.preventDefault()}
               className={cn(sortDirection === "asc" && "bg-accent")}
             >
               <ArrowUpIcon className="mr-2 size-4" />
@@ -146,6 +147,7 @@ export function SortDropdownMenu<TData extends RowData>({
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => handleSort("desc")}
+              onSelect={(e) => e.preventDefault()}
               className={cn(sortDirection === "desc" && "bg-accent", "mt-1")}
             >
               <ArrowDownIcon className="mr-2 size-4" />
