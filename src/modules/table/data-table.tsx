@@ -10,7 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
-// import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableCore } from "./data-table-core";
 import { Button } from "@/components/ui/button";
@@ -37,6 +37,9 @@ export function DataTable<TData, TValue>({
   pageSizeOptions = [10, 20, 30, 40, 50],
 }: DataTableProps<TData, TValue>) {
   // const [globalFilter, setGlobalFilter] = useState<string>("");
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [showSearchAndFilter, setShowSearchAndFilter] =
+    useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -69,32 +72,80 @@ export function DataTable<TData, TValue>({
         className="max-w-sm"
       /> */}
       <div className="flex flex-col border rounded-2xl overflow-hidden">
-        <div className="flex items-center justify-between p-2 border-b">
-          <div className="flex items-center gap-2">
-            <Tabs defaultValue="all">
-              <TabsList className="p-0 h-7 bg-transparent">
-                <TabsTrigger value="all" className="px-3 data-[state=active]:bg-muted">
-                  全部
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Button size="icon" variant="ghost" className="size-7">
-              <PlusIcon />
-            </Button>
+        {!showSearchAndFilter && (
+          <div className="h-11 flex items-center justify-between p-2 border-b">
+            <div className="flex items-center gap-2">
+              <Tabs defaultValue="all">
+                <TabsList className="p-0 h-7 bg-transparent">
+                  <TabsTrigger
+                    value="all"
+                    className="px-3 data-[state=active]:bg-muted"
+                  >
+                    全部
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+              <Button size="icon" variant="ghost" className="size-7">
+                <PlusIcon />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                size="icon"
+                variant="outline"
+                className="h-7 w-12 gap-0"
+                onClick={() => setShowSearchAndFilter(true)}
+              >
+                <SearchIcon className="m-0.5" />
+                <ListFilterIcon className="m-0.5" />
+              </Button>
+              <Button size="icon" variant="outline" className="size-7">
+                <Columns3Icon />
+              </Button>
+              <Button size="icon" variant="outline" className="size-7">
+                <ArrowUpDownIcon />
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="outline" className="h-7 w-12 gap-0">
-              <SearchIcon className="m-0.5" />
-              <ListFilterIcon className="m-0.5" />
-            </Button>
-            <Button size="icon" variant="outline" className="size-7">
-              <Columns3Icon />
-            </Button>
-            <Button size="icon" variant="outline" className="size-7">
-              <ArrowUpDownIcon />
-            </Button>
-          </div>
-        </div>
+        )}
+
+        {showSearchAndFilter && (
+          <>
+            <div className="h-11 flex items-center justify-between p-2 border-b gap-4">
+              <Input
+                placeholder="搜索全部"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className="h-8"
+              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  className="h-6 px-2 py-1"
+                  onClick={() => setShowSearchAndFilter(false)}
+                >
+                  <span>取消</span>
+                </Button>
+                <Button variant="secondary" className="h-6 px-2 py-1">
+                  另存为
+                </Button>
+                <Button size="icon" variant="outline" className="size-7">
+                  <ArrowUpDownIcon />
+                </Button>
+              </div>
+            </div>
+            <div className="h-9 flex items-center px-2 py-1.5 border-b gap-1">
+              <Button
+                variant="outline"
+                className="h-6 has-[>svg]:pl-2 has-[>svg]:pr-1.5 py-0 border-dashed gap-0 text-muted-foreground"
+              >
+                <span className="text-xs font-normal">添加筛选条件</span>
+                <PlusIcon />
+              </Button>
+            </div>
+          </>
+        )}
+
         <DataTableCore table={table} columns={columns} />
       </div>
       <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
