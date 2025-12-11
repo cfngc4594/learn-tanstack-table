@@ -5,8 +5,9 @@ import {
   getCoreRowModel,
   // getFilteredRowModel,
   getPaginationRowModel,
-  // getSortedRowModel,
+  getSortedRowModel,
   RowSelectionState,
+  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
 import { useState } from "react";
@@ -17,7 +18,6 @@ import { DataTableCore } from "./data-table-core";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  ArrowUpDownIcon,
   Columns3Icon,
   ListFilterIcon,
   PlusIcon,
@@ -26,6 +26,7 @@ import {
 import { useColumnVisibility } from "./hooks/use-column-visibility";
 import { useColumnOrder } from "./hooks/use-column-order";
 import { DraggableColumnItem } from "./components/draggable-column-item";
+import { SortDropdownMenu } from "./components/sort-dropdown-menu";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -46,6 +47,7 @@ export function DataTable<TData, TValue>({
     useState<boolean>(false);
   const [isColumnEditMode, setIsColumnEditMode] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [sorting, setSorting] = useState<SortingState>([]);
 
   // 使用自定义 hook 管理列可见性
   const {
@@ -74,12 +76,13 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    // getSortedRowModel: getSortedRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     // getFilteredRowModel: getFilteredRowModel(),
     // onGlobalFilterChange: setGlobalFilter,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
+    onSortingChange: setSorting,
     initialState: {
       pagination: {
         pageSize,
@@ -90,6 +93,7 @@ export function DataTable<TData, TValue>({
       rowSelection,
       columnVisibility,
       columnOrder,
+      sorting,
     },
   });
 
@@ -193,9 +197,7 @@ export function DataTable<TData, TValue>({
               >
                 <Columns3Icon />
               </Button>
-              <Button size="icon" variant="outline" className="size-7">
-                <ArrowUpDownIcon />
-              </Button>
+              <SortDropdownMenu table={table} />
             </div>
           </div>
         )}
@@ -262,9 +264,7 @@ export function DataTable<TData, TValue>({
                 <Button variant="secondary" className="h-6 px-2 py-1">
                   另存为
                 </Button>
-                <Button size="icon" variant="outline" className="size-7">
-                  <ArrowUpDownIcon />
-                </Button>
+                <SortDropdownMenu table={table} />
               </div>
             </div>
             <div className="h-9 flex items-center px-2 py-1.5 border-b gap-1">
