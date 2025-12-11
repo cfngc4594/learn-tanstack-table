@@ -20,7 +20,7 @@ export function DataTableCore<TData, TValue>({
   columns,
 }: DataTableCoreProps<TData, TValue>) {
   return (
-    <div className="overflow-hidden rounded-md border">
+    <div className="overflow-hidden">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
