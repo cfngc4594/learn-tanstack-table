@@ -3,12 +3,13 @@
 import {
   ColumnDef,
   getCoreRowModel,
-  // getFilteredRowModel,
+  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   RowSelectionState,
   SortingState,
   useReactTable,
+  FilterFn,
 } from "@tanstack/react-table";
 import { useState } from "react";
 import { Reorder } from "framer-motion";
@@ -41,13 +42,30 @@ export function DataTable<TData, TValue>({
   pageSize = 10,
   pageSizeOptions = [10, 20, 30, 40, 50],
 }: DataTableProps<TData, TValue>) {
-  // const [globalFilter, setGlobalFilter] = useState<string>("");
-  const [searchValue, setSearchValue] = useState<string>("");
+  const [globalFilter, setGlobalFilter] = useState<string>("");
   const [showSearchAndFilter, setShowSearchAndFilter] =
     useState<boolean>(false);
   const [isColumnEditMode, setIsColumnEditMode] = useState<boolean>(false);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
+
+  // 自定义全局过滤函数：只搜索可见的列
+  const globalFilterFn: FilterFn<TData> = (row, _columnId, filterValue) => {
+    const search = filterValue.toLowerCase();
+
+    // 获取所有可见的列
+    const visibleColumns = row.getAllCells().filter((cell) => {
+      const column = cell.column;
+      return column.getIsVisible();
+    });
+
+    // 在可见列中搜索
+    return visibleColumns.some((cell) => {
+      const cellValue = cell.getValue();
+      if (cellValue == null) return false;
+      return String(cellValue).toLowerCase().includes(search);
+    });
+  };
 
   // 使用自定义 hook 管理列可见性
   const {
@@ -77,8 +95,9 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    // getFilteredRowModel: getFilteredRowModel(),
-    // onGlobalFilterChange: setGlobalFilter,
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: globalFilterFn,
+    onGlobalFilterChange: setGlobalFilter,
     onRowSelectionChange: setRowSelection,
     onColumnVisibilityChange: setColumnVisibility,
     onColumnOrderChange: setColumnOrder,
@@ -89,7 +108,7 @@ export function DataTable<TData, TValue>({
       },
     },
     state: {
-      // globalFilter,
+      globalFilter,
       rowSelection,
       columnVisibility,
       columnOrder,
@@ -155,12 +174,6 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* <Input
-        placeholder="全局搜索..."
-        value={globalFilter}
-        onChange={(e) => setGlobalFilter(e.target.value)}
-        className="max-w-sm"
-      /> */}
       <div className="flex flex-col border rounded-2xl overflow-hidden">
         {!showSearchAndFilter && !isColumnEditMode && (
           <div className="h-11 flex items-center justify-between p-2 border-b">
@@ -249,15 +262,18 @@ export function DataTable<TData, TValue>({
             <div className="h-11 flex items-center justify-between p-2 border-b gap-4">
               <Input
                 placeholder="搜索全部"
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                value={globalFilter}
+                onChange={(e) => setGlobalFilter(e.target.value)}
                 className="h-8"
               />
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   className="h-6 px-2 py-1"
-                  onClick={() => setShowSearchAndFilter(false)}
+                  onClick={() => {
+                    setGlobalFilter("");
+                    setShowSearchAndFilter(false);
+                  }}
                 >
                   <span>取消</span>
                 </Button>
