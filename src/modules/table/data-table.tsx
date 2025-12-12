@@ -175,12 +175,17 @@ export function DataTable<TData, TValue>({
     return { success: true };
   });
 
-  const globalSearch = globalSearchDef.client((input) => {
+  const globalSearch = globalSearchDef.client(async (input) => {
     if (!showSearchAndFilter) {
       setShowSearchAndFilter(true);
     }
 
     setGlobalFilter(input.query);
+
+    // 等待 React 状态更新完成
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // 现在获取正确的过滤结果
     const resultCount = table.getFilteredRowModel().rows.length;
     return { resultCount };
   });
