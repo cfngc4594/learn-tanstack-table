@@ -29,6 +29,29 @@ import { useColumnOrder } from "./hooks/use-column-order";
 import { DraggableColumnItem } from "./components/draggable-column-item";
 import { SortDropdownMenu } from "./components/sort-dropdown-menu";
 import { getEditableColumnIds, getFixedColumnIds } from "./utils";
+import {
+  Conversation,
+  ConversationContent,
+  ConversationEmptyState,
+  ConversationScrollButton,
+} from "@/components/ai-elements/conversation";
+import {
+  PromptInput,
+  PromptInputBody,
+  PromptInputTextarea,
+  PromptInputFooter,
+  PromptInputSubmit,
+  PromptInputMessage,
+} from "@/components/ai-elements/prompt-input";
+import { useTheme } from "next-themes";
+import { globalSearchDef, updateThemeDef } from "@/tools/definitions";
+import {
+  clientTools,
+  createChatClientOptions,
+  fetchServerSentEvents,
+} from "@tanstack/ai-client";
+import { useChat } from "@tanstack/ai-react";
+import { MessageComponent } from "@/components/chat";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -142,6 +165,40 @@ export function DataTable<TData, TValue>({
     resetPendingVisibility();
     resetPendingOrder();
     setIsColumnEditMode(false);
+  };
+
+  const { setTheme } = useTheme();
+
+  // Create client implementations with actual theme setter
+  const updateThemeClient = updateThemeDef.client((input) => {
+    setTheme(input.theme);
+    return { success: true };
+  });
+
+  const globalSearch = globalSearchDef.client((input) => {
+    if (!showSearchAndFilter) {
+      setShowSearchAndFilter(true);
+    }
+
+    setGlobalFilter(input.query);
+    const resultCount = table.getFilteredRowModel().rows.length;
+    return { resultCount };
+  });
+
+  // Create typed tools array
+  const clientToolsArray = clientTools(updateThemeClient, globalSearch);
+
+  const chatClientOptions = createChatClientOptions({
+    connection: fetchServerSentEvents("/api/chat"),
+    tools: clientToolsArray,
+  });
+
+  const { messages, sendMessage, isLoading } = useChat(chatClientOptions);
+
+  const handleSubmit = ({ text }: PromptInputMessage) => {
+    if (text.trim() && !isLoading) {
+      sendMessage(text);
+    }
   };
 
   return (
@@ -307,6 +364,37 @@ export function DataTable<TData, TValue>({
         {!isColumnEditMode && <DataTableCore table={table} columns={columns} />}
       </div>
       <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
+      <div className="flex flex-col">
+        {/* Messages */}
+        <Conversation className="flex-1">
+          <ConversationContent>
+            {messages.length === 0 ? (
+              <ConversationEmptyState
+                title="Start a conversation"
+                description="Send a message to get started"
+              />
+            ) : (
+              messages.map((message) => (
+                <MessageComponent key={message.id} message={message} />
+              ))
+            )}
+          </ConversationContent>
+          <ConversationScrollButton />
+        </Conversation>
+
+        {/* Input */}
+        <div className="p-4 border-t">
+          <PromptInput onSubmit={handleSubmit}>
+            <PromptInputBody>
+              <PromptInputTextarea placeholder="Type a message..." />
+            </PromptInputBody>
+            <PromptInputFooter>
+              <div />
+              <PromptInputSubmit status={isLoading ? "submitted" : undefined} />
+            </PromptInputFooter>
+          </PromptInput>
+        </div>
+      </div>
     </div>
   );
 }

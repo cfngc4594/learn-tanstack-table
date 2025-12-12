@@ -1,5 +1,8 @@
 import { openai } from "@/lib/openai";
-import { updateThemeDef } from "@/tools/definitions";
+import {
+  globalSearchDef,
+  updateThemeDef,
+} from "@/tools/definitions";
 import { chat, toStreamResponse } from "@tanstack/ai";
 
 export async function POST(request: Request) {
@@ -10,7 +13,7 @@ export async function POST(request: Request) {
     messages,
     model: "gpt-4",
     conversationId,
-    tools: [updateThemeDef],
+    tools: [updateThemeDef, globalSearchDef],
   });
 
   // Convert stream to HTTP response

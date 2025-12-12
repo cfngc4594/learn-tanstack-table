@@ -11,3 +11,14 @@ export const updateThemeDef = toolDefinition({
     success: z.boolean(),
   }),
 });
+
+export const globalSearchDef = toolDefinition({
+  name: "global_search",
+  description: "Search data globally based on a search query",
+  inputSchema: z.object({
+    query: z.string().describe("The search query to search data"),
+  }),
+  outputSchema: z.object({
+    resultCount: z.number().describe("Number of items found"),
+  }),
+});
