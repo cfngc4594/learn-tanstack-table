@@ -28,6 +28,7 @@ import { useColumnVisibility } from "./hooks/use-column-visibility";
 import { useColumnOrder } from "./hooks/use-column-order";
 import { DraggableColumnItem } from "./components/draggable-column-item";
 import { SortDropdownMenu } from "./components/sort-dropdown-menu";
+import { getEditableColumnIds, getFixedColumnIds } from "./utils";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -116,39 +117,10 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  // 辅助函数：获取可编辑的列（可隐藏的列）
-  const getEditableColumnIds = () => {
-    const currentOrder = table.getState().columnOrder;
-    return currentOrder.length > 0
-      ? currentOrder.filter((id) => {
-          const column = table.getColumn(id);
-          return column?.getCanHide();
-        })
-      : table
-          .getAllColumns()
-          .filter((column) => column.getCanHide())
-          .map((column) => column.id);
-  };
-
-  // 辅助函数：获取固定列（不可隐藏的列）
-  const getFixedColumnIds = () => {
-    const currentOrder = table.getState().columnOrder;
-    const allColumns = table.getAllColumns();
-
-    return currentOrder.length > 0
-      ? currentOrder.filter((id) => {
-          const column = table.getColumn(id);
-          return column && !column.getCanHide();
-        })
-      : allColumns
-          .filter((column) => !column.getCanHide())
-          .map((column) => column.id);
-  };
-
   // 进入列编辑模式
   const enterColumnEditMode = () => {
     initPendingVisibility(table.getState().columnVisibility);
-    initPendingOrder(getEditableColumnIds());
+    initPendingOrder(getEditableColumnIds(table));
     setIsColumnEditMode(true);
   };
 
@@ -157,7 +129,7 @@ export function DataTable<TData, TValue>({
     applyPendingVisibility();
 
     // 合并固定列和可编辑列的顺序
-    const fixedColumns = getFixedColumnIds();
+    const fixedColumns = getFixedColumnIds(table);
     const mergedColumnOrder = [...fixedColumns, ...pendingColumnOrder];
 
     // 设置完整的列顺序
