@@ -12,7 +12,6 @@ import {
   FilterFn,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import { Reorder } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableCore } from "./data-table-core";
@@ -26,8 +25,8 @@ import {
 } from "lucide-react";
 import { useColumnVisibility } from "./hooks/use-column-visibility";
 import { useColumnOrder } from "./hooks/use-column-order";
-import { DraggableColumnItem } from "./components/draggable-column-item";
 import { SortDropdownMenu } from "./components/sort-dropdown-menu";
+import { ColumnReorderList } from "./components/column-reorder-list";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -302,34 +301,14 @@ export function DataTable<TData, TValue>({
           </>
         )}
 
-        {isColumnEditMode && pendingColumnOrder.length > 0 && (
-          <Reorder.Group
-            axis="x"
-            values={pendingColumnOrder}
+        {isColumnEditMode && (
+          <ColumnReorderList
+            table={table}
+            pendingColumnOrder={pendingColumnOrder}
+            pendingColumnVisibility={pendingColumnVisibility}
             onReorder={setPendingColumnOrder}
-            className="flex items-center p-2 gap-2 overflow-x-auto"
-          >
-            {pendingColumnOrder.map((columnId) => {
-              const column = table.getColumn(columnId);
-              if (!column) return null;
-
-              const isVisible = pendingColumnVisibility[columnId] !== false;
-              const columnHeader =
-                typeof column.columnDef.header === "string"
-                  ? column.columnDef.header
-                  : columnId;
-
-              return (
-                <DraggableColumnItem
-                  key={columnId}
-                  columnId={columnId}
-                  columnHeader={columnHeader}
-                  isVisible={isVisible}
-                  onToggleVisibility={togglePendingVisibility}
-                />
-              );
-            })}
-          </Reorder.Group>
+            onToggleVisibility={togglePendingVisibility}
+          />
         )}
 
         {!isColumnEditMode && <DataTableCore table={table} columns={columns} />}
